@@ -8769,6 +8769,22 @@ FORCE_INLINE void _sse2neon_mm_set_denormals_zero_mode(unsigned int flag)
 #endif
 }
 
+/* from https://github.com/DLTcollab/sse2neon/issues/472#issuecomment-894836735 */
+static __inline__ uint64_t __rdtsc(void)
+{
+    uint64_t val;
+
+    /* According to ARM DDI 0487F.c, from Armv8.0 to Armv8.5 inclusive, the
+     * system counter is at least 56 bits wide; from Armv8.6, the counter
+     * must be 64 bits wide.  So the system counter could be less than 64
+     * bits wide and it is attributed with the flag 'cap_user_time_short'
+     * is true.
+     */
+    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
+
+    return val;
+}
+
 #if defined(__GNUC__) || defined(__clang__)
 #pragma pop_macro("ALIGN_STRUCT")
 #pragma pop_macro("FORCE_INLINE")
